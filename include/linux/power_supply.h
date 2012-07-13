@@ -45,11 +45,11 @@ enum {
 	POWER_SUPPLY_CHARGE_TYPE_TRICKLE,
 	POWER_SUPPLY_CHARGE_TYPE_FAST,
 	POWER_SUPPLY_CHARGE_TYPE_TAPER,
-#ifdef CONFIG_MACH_MSM8974_14001	
+#ifdef CONFIG_MACH_MSM8974_14001
 	/*OPPO 2013-10-22 liaofuchun add for bq24196 charger*/
 	POWER_SUPPLY_CHARGE_TYPE_TERMINATE,
 	/*OPPO 2013-10-28 liaofuchun add end*/
-#endif	
+#endif
 };
 
 enum {
@@ -144,6 +144,8 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_SCOPE,
 	POWER_SUPPLY_PROP_SYSTEM_TEMP_LEVEL,
 	POWER_SUPPLY_PROP_RESISTANCE,
+	/* Local extensions */
+	POWER_SUPPLY_PROP_USB_HC,
 	POWER_SUPPLY_PROP_AUTHENTICATE,//wangjc add for authentication
 	/* jingchun.wang@Onlinerd.Driver, 2013/12/16  Add for charge timeout */
 	POWER_SUPPLY_PROP_CHARGE_TIMEOUT,
@@ -153,8 +155,6 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_MODEL_NAME,
 	POWER_SUPPLY_PROP_MANUFACTURER,
 	POWER_SUPPLY_PROP_SERIAL_NUMBER,
-	/* Local extensions */
-	POWER_SUPPLY_PROP_USB_HC,
 };
 
 enum power_supply_type {

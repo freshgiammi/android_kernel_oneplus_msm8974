@@ -185,6 +185,8 @@ static struct device_attribute power_supply_attrs[] = {
 	POWER_SUPPLY_ATTR(type),
 	POWER_SUPPLY_ATTR(scope),
 	POWER_SUPPLY_ATTR(system_temp_level),
+	/* Local extensions */
+	POWER_SUPPLY_ATTR(usb_hc),
 	POWER_SUPPLY_ATTR(resistance),
 	POWER_SUPPLY_ATTR(authenticate),//wangjc add for authentication
 #ifdef CONFIG_MACH_MSM8974_14001
@@ -199,8 +201,6 @@ static struct device_attribute power_supply_attrs[] = {
 	POWER_SUPPLY_ATTR(model_name),
 	POWER_SUPPLY_ATTR(manufacturer),
 	POWER_SUPPLY_ATTR(serial_number),
-	/* Local extensions */
-	POWER_SUPPLY_ATTR(usb_hc),
 };
 
 static struct attribute *
