@@ -146,6 +146,7 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_RESISTANCE,
 	/* Local extensions */
 	POWER_SUPPLY_PROP_USB_HC,
+	POWER_SUPPLY_PROP_USB_OTG,
 	POWER_SUPPLY_PROP_AUTHENTICATE,//wangjc add for authentication
 	/* jingchun.wang@Onlinerd.Driver, 2013/12/16  Add for charge timeout */
 	POWER_SUPPLY_PROP_CHARGE_TIMEOUT,
