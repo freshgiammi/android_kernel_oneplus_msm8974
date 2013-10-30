@@ -266,6 +266,7 @@ struct msm_vidc_inst {
 	enum buffer_mode_type buffer_mode_set[MAX_PORT_NUM];
 
 	bool map_output_buffer;
+	atomic_t get_seq_hdr_cnt;
 	struct v4l2_ctrl **ctrls;
 };
 
