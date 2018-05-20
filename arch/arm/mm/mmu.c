@@ -222,7 +222,7 @@ static struct mem_type mem_types[] = {
 		.prot_l1	= PMD_TYPE_TABLE,
 		.prot_sect	= PROT_SECT_DEVICE | PMD_SECT_WB,
 		.domain		= DOMAIN_IO,
-	},	
+	},
 	[MT_DEVICE_WC] = {	/* ioremap_wc */
 		.prot_pte	= PROT_PTE_DEVICE | L_PTE_MT_DEV_WC,
 		.prot_l1	= PMD_TYPE_TABLE,
@@ -579,7 +579,7 @@ static void __init build_mem_type_table(void)
 #endif
 
 	for (i = 0; i < 16; i++) {
-		unsigned long v = pgprot_val(protection_map[i]);
+		pteval_t v = pgprot_val(protection_map[i]);
 		protection_map[i] = __pgprot(v | user_pgprot);
 	}
 

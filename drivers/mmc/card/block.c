@@ -47,7 +47,7 @@
 
 #include "queue.h"
 
-#ifdef CONFIG_MACH_MSM8974_14001 
+#ifdef CONFIG_MACH_MSM8974_14001
 //Zhilong.Zhang@OnlineRd.Driver, 2013/10/24, Add for eMMC and DDR device information
 #include <mach/device_info.h>
 #include <linux/pcb_version.h>
@@ -1635,7 +1635,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
 		}
 #endif
 #endif /* CONFIG_MACH_MSM8974_14001 */
-		
+
 		switch (mmc_blk_cmd_recovery(card, req, brq, &ecc_err, &gen_err)) {
 		case ERR_RETRY:
 			return MMC_BLK_RETRY;
@@ -1728,7 +1728,7 @@ static int mmc_blk_err_check(struct mmc_card *card,
 #ifdef CONFIG_MACH_MSM8974_14001
 #if 0 //sjc20141106 delete
 //Zhilong.Zhang@OnlineRd.Driver, 2013/12/28, Add for solve QT bug(ID:390597): Bad micro SD card cause the phone to suspend/wakeup abnormal
-		if ((card->host->index == 1) 
+		if ((card->host->index == 1)
 			&& (rq_data_dir(req) == READ)) {
 			bad_micro_sd_card = 1;
 			printk(KERN_ERR"%s: bad sd card had been detected.\n", __func__);
@@ -2672,7 +2672,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
 			} else {
 				mmc_blk_reinsert_req(areq);
 			}
-			
+
 #ifdef CONFIG_MACH_MSM8974_14001
 /* OPPO 2014-11-06 sjc Modify begin for T card problem */
 			set_bit(MMC_QUEUE_URGENT_REQUEST, &mq->flags);
@@ -3281,6 +3281,11 @@ force_ro_fail:
 	return ret;
 }
 
+#define CID_MANFID_SANDISK	0x2
+#define CID_MANFID_TOSHIBA	0x11
+#define CID_MANFID_MICRON	0x13
+#define CID_MANFID_SAMSUNG	0x15
+
 static const struct mmc_fixup blk_fixups[] =
 {
 	MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
@@ -3355,14 +3360,14 @@ static const struct mmc_fixup blk_fixups[] =
 	END_FIXUP
 };
 
-#ifdef CONFIG_MACH_MSM8974_14001 
+#ifdef CONFIG_MACH_MSM8974_14001
 //Zhilong.Zhang@OnlineRd.Driver, 2014/08/06, Add for mainboard device information
 struct manufacture_info mainboard_info;
 
 static void mainboard_verify(void)
 {
 	switch(get_pcb_version()) {
-		case HW_VERSION__10:		
+		case HW_VERSION__10:
 			mainboard_info.version ="10";
 			mainboard_info.manufacture = "SA";
 			break;
@@ -3378,7 +3383,7 @@ static void mainboard_verify(void)
 			mainboard_info.version = "13";
 			mainboard_info.manufacture = "SD";
 			break;
-		case HW_VERSION__20:		
+		case HW_VERSION__20:
 			mainboard_info.version ="20";
 			mainboard_info.manufacture = "SA";
 			break;
@@ -3395,7 +3400,7 @@ static void mainboard_verify(void)
 			mainboard_info.manufacture = "SD";
 			break;
 
-		case HW_VERSION__30:		
+		case HW_VERSION__30:
 			mainboard_info.version ="30";
 			mainboard_info.manufacture = "SA";
 			break;
@@ -3411,7 +3416,7 @@ static void mainboard_verify(void)
 			mainboard_info.version = "33";
 			mainboard_info.manufacture = "SD";
 			break;
-		case HW_VERSION__40:		
+		case HW_VERSION__40:
 			mainboard_info.version ="40";
 			mainboard_info.manufacture = "SA";
 			break;
@@ -3426,11 +3431,11 @@ static void mainboard_verify(void)
 		case HW_VERSION__43:
 			mainboard_info.version = "43";
 			mainboard_info.manufacture = "SD";
-			break;			
+			break;
 		default:
 			mainboard_info.version = "UNKOWN";
 			mainboard_info.manufacture = "UNKOWN";
-		}	
+		}
 }
 #endif /* CONFIG_MACH_MSM8974_14001 */
 
@@ -3438,8 +3443,8 @@ static int mmc_blk_probe(struct mmc_card *card)
 {
 	struct mmc_blk_data *md, *part_md;
 	char cap_str[10];
-#ifdef CONFIG_MACH_MSM8974_14001 
-//Zhilong.Zhang@OnlineRd.Driver, 2013/10/24, Add for eMMC and DDR device information	
+#ifdef CONFIG_MACH_MSM8974_14001
+//Zhilong.Zhang@OnlineRd.Driver, 2013/10/24, Add for eMMC and DDR device information
 	char * manufacturerid;
 	struct manufacture_info ddr_info_1 = {
 		.version = "EDFA164A2PB",
@@ -3448,7 +3453,7 @@ static int mmc_blk_probe(struct mmc_card *card)
 	struct manufacture_info ddr_info_2 = {
 		.version = "K3QF7F70DM",
 		.manufacture = "SAMSUNG",
-	};	
+	};
 #endif /* CONFIG_MACH_MSM8974_14001 */
 
 	/*
@@ -3458,7 +3463,7 @@ static int mmc_blk_probe(struct mmc_card *card)
 		return -ENODEV;
 
 #ifdef CONFIG_MACH_MSM8974_14001
-    mmc_mid = card->cid.manfid;//added by liwei  
+    mmc_mid = card->cid.manfid;//added by liwei
 //Zhilong.Zhang@OnlineRd.Driver, 2013/10/24, Add for eMMC and DDR device information
 	switch (card->cid.manfid) {
 		case  0x11:
@@ -3489,7 +3494,7 @@ static int mmc_blk_probe(struct mmc_card *card)
 
 		//Zhilong.Zhang@OnlineRd.Driver, 2014/08/06, Add for mainboard device information
 		mainboard_verify();
-		register_device_proc("mainboard", mainboard_info.version, mainboard_info.manufacture);		
+		register_device_proc("mainboard", mainboard_info.version, mainboard_info.manufacture);
 	}
 #endif /* CONFIG_MACH_MSM8974_14001 */
 

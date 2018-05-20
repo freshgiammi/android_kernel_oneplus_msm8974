@@ -6,10 +6,10 @@
  * Maintainer: Deepak Saxena <dsaxena@plexity.net>
  *
  * Copyright 2002 (c) Intel Corporation
- * Copyright 2003-2004 (c) MontaVista, Software, Inc. 
- * 
- * This file is licensed under  the terms of the GNU General Public 
- * License version 2. This program is licensed "as is" without any 
+ * Copyright 2003-2004 (c) MontaVista, Software, Inc.
+ *
+ * This file is licensed under  the terms of the GNU General Public
+ * License version 2. This program is licensed "as is" without any
  * warranty of any kind, whether express or implied.
  */
 
@@ -29,6 +29,7 @@
 #include <linux/io.h>
 #include <linux/export.h>
 #include <linux/sched_clock.h>
+#include <linux/gpio.h>
 
 #include <mach/udc.h>
 #include <mach/hardware.h>
@@ -107,7 +108,7 @@ static signed char irq2gpio[32] = {
 	 7,  8,  9, 10, 11, 12, -1, -1,
 };
 
-int gpio_to_irq(int gpio)
+static int ixp4xx_gpio_to_irq(struct gpio_chip *chip, unsigned gpio)
 {
 	int irq;
 
@@ -117,7 +118,6 @@ int gpio_to_irq(int gpio)
 	}
 	return -EINVAL;
 }
-EXPORT_SYMBOL(gpio_to_irq);
 
 int irq_to_gpio(unsigned int irq)
 {
@@ -248,7 +248,7 @@ void __init ixp4xx_init_irq(void)
 	*IXP4XX_ICLR = 0x0;
 
 	/* Disable all interrupt */
-	*IXP4XX_ICMR = 0x0; 
+	*IXP4XX_ICMR = 0x0;
 
 	if (cpu_is_ixp46x() || cpu_is_ixp43x()) {
 		/* Route upper 32 sources to IRQ instead of FIQ */
@@ -269,7 +269,7 @@ void __init ixp4xx_init_irq(void)
 
 /*************************************************************************
  * IXP4xx timer tick
- * We use OS timer1 on the CPU for the timer tick and the timestamp 
+ * We use OS timer1 on the CPU for the timer tick and the timestamp
  * counter as a source of real clock ticks to account for missed jiffies.
  *************************************************************************/
 
@@ -383,11 +383,55 @@ static struct platform_device *ixp46x_devices[] __initdata = {
 unsigned long ixp4xx_exp_bus_size;
 EXPORT_SYMBOL(ixp4xx_exp_bus_size);
 
+static int ixp4xx_gpio_direction_input(struct gpio_chip *chip, unsigned gpio)
+{
+	gpio_line_config(gpio, IXP4XX_GPIO_IN);
+
+	return 0;
+}
+
+static int ixp4xx_gpio_direction_output(struct gpio_chip *chip, unsigned gpio,
+					int level)
+{
+	gpio_line_set(gpio, level);
+	gpio_line_config(gpio, IXP4XX_GPIO_OUT);
+
+	return 0;
+}
+
+static int ixp4xx_gpio_get_value(struct gpio_chip *chip, unsigned gpio)
+{
+	int value;
+
+	gpio_line_get(gpio, &value);
+
+	return value;
+}
+
+static void ixp4xx_gpio_set_value(struct gpio_chip *chip, unsigned gpio,
+				  int value)
+{
+	gpio_line_set(gpio, value);
+}
+
+static struct gpio_chip ixp4xx_gpio_chip = {
+	.label			= "IXP4XX_GPIO_CHIP",
+	.direction_input	= ixp4xx_gpio_direction_input,
+	.direction_output	= ixp4xx_gpio_direction_output,
+	.get			= ixp4xx_gpio_get_value,
+	.set			= ixp4xx_gpio_set_value,
+	.to_irq			= ixp4xx_gpio_to_irq,
+	.base			= 0,
+	.ngpio			= 16,
+};
+
 void __init ixp4xx_sys_init(void)
 {
 	ixp4xx_exp_bus_size = SZ_16M;
 
 	platform_add_devices(ixp4xx_devices, ARRAY_SIZE(ixp4xx_devices));
+
+	gpiochip_add(&ixp4xx_gpio_chip);
 
 	if (cpu_is_ixp46x()) {
 		int region;

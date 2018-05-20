@@ -321,7 +321,6 @@ void kernel_restart_prepare(char *cmd)
 	system_state = SYSTEM_RESTART;
 	usermodehelper_disable();
 	device_shutdown();
-	syscore_shutdown();
 }
 
 /**
@@ -355,6 +354,29 @@ int unregister_reboot_notifier(struct notifier_block *nb)
 }
 EXPORT_SYMBOL(unregister_reboot_notifier);
 
+/* Add backwards compatibility for stable trees. */
+#ifndef PF_NO_SETAFFINITY
+#define PF_NO_SETAFFINITY		PF_THREAD_BOUND
+#endif
+
+static void migrate_to_reboot_cpu(void)
+{
+	/* The boot cpu is always logical cpu 0 */
+	int cpu = 0;
+
+	cpu_hotplug_disable();
+
+	/* Make certain the cpu I'm about to reboot on is online */
+	if (!cpu_online(cpu))
+		cpu = cpumask_first(cpu_online_mask);
+
+	/* Prevent races with other tasks migrating this task */
+	current->flags |= PF_NO_SETAFFINITY;
+
+	/* Make certain I only run on the appropriate processor */
+	set_cpus_allowed_ptr(current, cpumask_of(cpu));
+}
+
 /**
  *	kernel_restart - reboot the system
  *	@cmd: pointer to buffer containing command to execute for restart
@@ -366,6 +388,8 @@ EXPORT_SYMBOL(unregister_reboot_notifier);
 void kernel_restart(char *cmd)
 {
 	kernel_restart_prepare(cmd);
+	migrate_to_reboot_cpu();
+	syscore_shutdown();
 	if (!cmd)
 		printk(KERN_EMERG "Restarting system.\n");
 	else
@@ -391,6 +415,7 @@ static void kernel_shutdown_prepare(enum system_states state)
 void kernel_halt(void)
 {
 	kernel_shutdown_prepare(SYSTEM_HALT);
+	migrate_to_reboot_cpu();
 	syscore_shutdown();
 	printk(KERN_EMERG "System halted.\n");
 	kmsg_dump(KMSG_DUMP_HALT);
@@ -409,7 +434,7 @@ void kernel_power_off(void)
 	kernel_shutdown_prepare(SYSTEM_POWER_OFF);
 	if (pm_power_off_prepare)
 		pm_power_off_prepare();
-	disable_nonboot_cpus();
+	migrate_to_reboot_cpu();
 	syscore_shutdown();
 	printk(KERN_EMERG "Power down.\n");
 	kmsg_dump(KMSG_DUMP_POWEROFF);
@@ -533,7 +558,7 @@ void ctrl_alt_del(void)
 	else
 		kill_cad_pid(SIGINT, 1);
 }
-	
+
 /*
  * Unprivileged users may change the real gid to the effective gid
  * or vice versa.  (BSD-style)
@@ -547,7 +572,7 @@ void ctrl_alt_del(void)
  *
  * The general idea is that a program which uses just setregid() will be
  * 100% compatible with BSD.  A program which uses just setgid() will be
- * 100% compatible with POSIX with saved IDs. 
+ * 100% compatible with POSIX with saved IDs.
  *
  * SMP: There are not races, the GIDs are checked only by filesystem
  *      operations (as far as semantic preservation is concerned).
@@ -595,7 +620,7 @@ error:
 }
 
 /*
- * setgid() is implemented like SysV w/ SAVED_IDS 
+ * setgid() is implemented like SysV w/ SAVED_IDS
  *
  * SMP: Same implicit races as above.
  */
@@ -667,7 +692,7 @@ static int set_user(struct cred *new)
  *
  * The general idea is that a program which uses just setreuid() will be
  * 100% compatible with BSD.  A program which uses just setuid() will be
- * 100% compatible with POSIX with saved IDs. 
+ * 100% compatible with POSIX with saved IDs.
  */
 SYSCALL_DEFINE2(setreuid, uid_t, ruid, uid_t, euid)
 {
@@ -718,17 +743,17 @@ error:
 	abort_creds(new);
 	return retval;
 }
-		
+
 /*
- * setuid() is implemented like SysV with SAVED_IDS 
- * 
+ * setuid() is implemented like SysV with SAVED_IDS
+ *
  * Note that SAVED_ID's is deficient in that a setuid root program
- * like sendmail, for example, cannot set its uid to be a normal 
+ * like sendmail, for example, cannot set its uid to be a normal
  * user and then switch back, because if you're root, setuid() sets
  * the saved uid too.  If you don't like this, blame the bright people
  * in the POSIX committee and/or USG.  Note that the BSD-style setreuid()
  * will allow a root program to temporarily drop privileges and be able to
- * regain them by swapping the real and effective uid.  
+ * regain them by swapping the real and effective uid.
  */
 SYSCALL_DEFINE1(setuid, uid_t, uid)
 {
@@ -1199,7 +1224,7 @@ static int override_release(char __user *release, size_t len)
 			rest++;
 		}
 		v = ((LINUX_VERSION_CODE >> 8) & 0xff) + 40;
-		copy = min(sizeof(buf), max_t(size_t, 1, len));
+		copy = clamp_t(size_t, len, 1, sizeof(buf));
 		copy = scnprintf(buf, copy, "2.6.%u%s", v, rest);
 		ret = copy_to_user(release, buf, copy + 1);
 	}
@@ -1372,7 +1397,7 @@ SYSCALL_DEFINE2(getrlimit, unsigned int, resource, struct rlimit __user *, rlim)
 /*
  *	Back compatibility for getrlimit. Needed for some apps.
  */
- 
+
 SYSCALL_DEFINE2(old_getrlimit, unsigned int, resource,
 		struct rlimit __user *, rlim)
 {

@@ -727,6 +727,7 @@ static int snd_usb_hw_params(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
+<<<<<<< HEAD
 	down_read(&subs->stream->chip->shutdown_rwsem);
 	if (subs->stream->chip->shutdown)
 		ret = -ENODEV;

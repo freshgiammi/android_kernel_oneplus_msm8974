@@ -67,7 +67,7 @@
 #define VENDOR_ID_MOTOROLA	0x22b8
 
 /***********************************************************************
- * Host functions 
+ * Host functions
  ***********************************************************************/
 
 static const char* host_info(struct Scsi_Host *host)
@@ -201,7 +201,7 @@ static int slave_configure(struct scsi_device *sdev)
 		/* Some devices cannot handle READ_CAPACITY_16 */
 		if (us->fflags & US_FL_NO_READ_CAPACITY_16)
 			sdev->no_read_capacity_16 = 1;
-#ifdef CONFIG_MACH_MSM8974_14001 
+#ifdef CONFIG_MACH_MSM8974_14001
 //Zhilong.Zhang@OnlineRd.Driver, 2013/11/12, Add for OTG device patch (From OPPO N1)
 		/*
 		 * Many devices do not respond properly to READ_CAPACITY_16.
@@ -269,7 +269,7 @@ static int slave_configure(struct scsi_device *sdev)
 	if (us->fflags & US_FL_NOT_LOCKABLE)
 		sdev->lockable = 0;
 
-	/* this is to satisfy the compiler, tho I don't think the 
+	/* this is to satisfy the compiler, tho I don't think the
 	 * return code is ever checked anywhere. */
 	return 0;
 }
@@ -525,7 +525,7 @@ static ssize_t store_max_sectors(struct device *dev, struct device_attribute *at
 		blk_queue_max_hw_sectors(sdev->request_queue, ms);
 		return count;
 	}
-	return -EINVAL;	
+	return -EINVAL;
 }
 
 static DEVICE_ATTR(max_sectors, S_IRUGO | S_IWUSR, show_max_sectors,
