@@ -458,7 +458,6 @@ __und_usr:
 	@ page table was modified by another CPU.
 	enable_irq
 
-	adr	lr, BSYM(__und_usr_unknown)
 	tst	r3, #PSR_T_BIT			@ Thumb mode?
 	bne	__und_usr_thumb
 	sub	r4, r2, #4			@ ARM instr at LR - 4
