@@ -1149,10 +1149,9 @@ static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 			pcpu->floor_validate_time =
 				ktime_to_us(ktime_get());
 			pcpu->hispeed_validate_time =
-			pcpu->floor_validate_time;
+				pcpu->floor_validate_time;
 			pcpu->local_hvtime = pcpu->floor_validate_time;
 			pcpu->min_freq = policy->min;
-
 			down_write(&pcpu->enable_sem);
 			del_timer_sync(&pcpu->cpu_timer);
 			del_timer_sync(&pcpu->cpu_slack_timer);
@@ -1231,12 +1230,14 @@ static int cpufreq_governor_interactive(struct cpufreq_policy *policy,
 			}
 
 			spin_unlock_irqrestore(&pcpu->target_freq_lock, flags);
+
 			if (policy->min < pcpu->min_freq)
 				cpufreq_interactive_timer_resched(j, true);
 			pcpu->min_freq = policy->min;
 
 			up_read(&pcpu->enable_sem);
 
+			if (anyboost) {
 				u64 now = ktime_to_us(ktime_get());
 
 				cpumask_set_cpu(j, &speedchange_cpumask);
